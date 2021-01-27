@@ -38,6 +38,9 @@ func getPictureInfo(idx int, num int, mkt string) (pURL []string, date []string,
 		}
 	}
 	err = json.Unmarshal(msg, &tmp)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	for _, data := range tmp.Images {
 		pURL = append(pURL, data.Urlbase)
