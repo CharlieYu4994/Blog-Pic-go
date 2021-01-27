@@ -19,7 +19,6 @@ func getPictureURL(res int) (pURL string, err error) {
 	if err != nil {
 		return
 	}
-
 	switch res {
 	case 0:
 		pURL = pic.HDURL
