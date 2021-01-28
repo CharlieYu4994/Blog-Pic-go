@@ -40,7 +40,8 @@ func init() {
 }
 
 func main() {
-	go timeToUpdatePic(time.Minute * 30)
+	go timeToUpdatePic(time.Minute * 10)
+	http.HandleFunc("/", homePage)
 	http.HandleFunc("/HDRES/", redirectToHD)
 	http.HandleFunc("/UHDRES/", redirectToUHD)
 	http.ListenAndServe("0.0.0.0:9090", nil)

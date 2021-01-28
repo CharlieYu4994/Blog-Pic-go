@@ -1,3 +1,4 @@
 *.exe
 *.upx
 Bing-API-go
+*.sql

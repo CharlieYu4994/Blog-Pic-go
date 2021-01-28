@@ -39,3 +39,10 @@ func redirectToUHD(w http.ResponseWriter, r *http.Request) {
 	}
 	http.Redirect(w, r, URL, 301)
 }
+
+func homePage(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w,
+		`Here is LassiCat's BingAPI.
+1920x1080: https://api.lassi-cat.cn:60443/HDRES
+UHD      : https://api.lassi-cat.cn:60443/UHDRES`)
+}
