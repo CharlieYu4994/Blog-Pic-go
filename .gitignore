@@ -2,3 +2,4 @@
 *.upx
 Bing-API-go
 *.sql
+config.json

@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 
 	_ "modernc.org/sqlite"
 )
@@ -39,7 +38,6 @@ func newValidator(db *sql.DB) validator {
 		res := db.QueryRow(`SELECT IFNULL((SELECT Date FROM Pictures WHERE Date=?), "NULL")`, date)
 		var tmp string
 		err := res.Scan(&tmp)
-		fmt.Println(tmp)
 		if err == nil {
 			if tmp == "NULL" {
 				return true, nil

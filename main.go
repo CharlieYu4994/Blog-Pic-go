@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"time"
 )
@@ -9,6 +10,7 @@ import (
 var dbinserter inserter
 var dbquerier querier
 var dbvalidator validator
+var conf config
 
 func updatePic(i inserter, v validator) (err error) {
 	tmpPURL, tmpDATE, err := getPictureInfo(-1, 1, "zh-CN")
@@ -42,7 +44,7 @@ func timeToUpdatePic() {
 	for {
 		<-timer.C
 		updatePic(dbinserter, dbvalidator)
-		timer.Reset(getDuration(16))
+		timer.Reset(getDuration(conf.UpdateTime))
 	}
 }
 
@@ -57,6 +59,8 @@ func init() {
 	}
 	dbquerier = newQuerier(db)
 	dbvalidator = newValidator(db)
+	readConf("./config.json", &conf)
+	fmt.Println(conf)
 	go timeToUpdatePic()
 }
 
@@ -64,5 +68,10 @@ func main() {
 	http.HandleFunc("/", homePage)
 	http.HandleFunc("/HDRES/", redirectToHD)
 	http.HandleFunc("/UHDRES/", redirectToUHD)
-	http.ListenAndServe("0.0.0.0:9090", nil)
+	if conf.EnableTLS {
+		http.ListenAndServeTLS("0.0.0.0:"+conf.Port,
+			conf.CertPath, conf.KeyPath, nil)
+	} else {
+		http.ListenAndServe("0.0.0.0:"+conf.Port, nil)
+	}
 }
