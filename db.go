@@ -2,12 +2,14 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 
 	_ "modernc.org/sqlite"
 )
 
 type inserter func(date, hdURL, uhdURL string) error
-type queryer func(date string) (*picture, error)
+type querier func(date string) (*picture, error)
+type validator func(date string) (bool, error)
 
 func newInserter(db *sql.DB) (inserter, error) {
 	cmd, err := db.Prepare("INSERT INTO Pictures(Date, HDURL, UHDURL)  values(?, ?, ?)")
@@ -20,7 +22,7 @@ func newInserter(db *sql.DB) (inserter, error) {
 	}, nil
 }
 
-func newQueryer(db *sql.DB) queryer {
+func newQuerier(db *sql.DB) querier {
 	return func(date string) (*picture, error) {
 		res := db.QueryRow("SELECT Date,HDURL,UHDURL FROM Pictures WHERE Date = ?", date)
 		tmp := &picture{}
@@ -29,5 +31,21 @@ func newQueryer(db *sql.DB) queryer {
 			return nil, err
 		}
 		return tmp, err
+	}
+}
+
+func newValidator(db *sql.DB) validator {
+	return func(date string) (bool, error) {
+		res := db.QueryRow(`SELECT IFNULL((SELECT Date FROM Pictures WHERE Date=?), "NULL")`, date)
+		var tmp string
+		err := res.Scan(&tmp)
+		fmt.Println(tmp)
+		if err == nil {
+			if tmp == "NULL" {
+				return true, nil
+			}
+			return false, nil
+		}
+		return false, err
 	}
 }

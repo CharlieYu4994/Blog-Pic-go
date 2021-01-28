@@ -7,22 +7,42 @@ import (
 )
 
 var dbinserter inserter
-var dbqueryer queryer
+var dbquerier querier
+var dbvalidator validator
 
-func updatePic(i inserter) (err error) {
+func updatePic(i inserter, v validator) (err error) {
 	tmpPURL, tmpDATE, err := getPictureInfo(-1, 1, "zh-CN")
 	if err != nil {
 		return
 	}
-	tmpPIC := rewriteURL(tmpPURL, tmpDATE)
-	err = i(tmpPIC[0].DATE, tmpPIC[0].HDURL, tmpPIC[0].UHDURL)
+	tmpPICs := rewriteURL(tmpPURL, tmpDATE)
+	for _, tmpPIC := range tmpPICs {
+		status, _ := v(tmpPIC.DATE)
+		if status {
+			i(tmpPIC.DATE, tmpPIC.HDURL, tmpPIC.UHDURL)
+		}
+	}
 	return
 }
 
-func timeToUpdatePic(dur time.Duration) {
-	ticker := time.Tick(dur)
-	for range ticker {
-		updatePic(dbinserter)
+func getDuration(hour int) time.Duration {
+	now := time.Now()
+	tmp := time.Duration(hour) * time.Hour
+	tstr := now.Format("20060102")
+	next, _ := time.ParseInLocation("20060102", tstr, time.Local)
+	dur := next.Add(tmp + time.Second*10).Sub(now)
+	if now.Hour() >= hour {
+		return dur + time.Hour*24
+	}
+	return dur
+}
+
+func timeToUpdatePic() {
+	timer := time.NewTimer(time.Second * 10)
+	for {
+		<-timer.C
+		updatePic(dbinserter, dbvalidator)
+		timer.Reset(getDuration(16))
 	}
 }
 
@@ -35,12 +55,12 @@ func init() {
 	if err != nil {
 		panic("Open Database Error")
 	}
-	dbqueryer = newQueryer(db)
-	updatePic(dbinserter)
+	dbquerier = newQuerier(db)
+	dbvalidator = newValidator(db)
+	go timeToUpdatePic()
 }
 
 func main() {
-	go timeToUpdatePic(time.Minute * 10)
 	http.HandleFunc("/", homePage)
 	http.HandleFunc("/HDRES/", redirectToHD)
 	http.HandleFunc("/UHDRES/", redirectToUHD)

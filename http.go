@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func getPictureURL(q queryer, res int) (string, error) {
+func getPictureURL(q querier, res int) (string, error) {
 	pic, err := q(time.Now().Format("20060102"))
 	if err != nil {
 		return "", nil
@@ -23,7 +23,7 @@ func getPictureURL(q queryer, res int) (string, error) {
 }
 
 func redirectToHD(w http.ResponseWriter, r *http.Request) {
-	URL, err := getPictureURL(dbqueryer, 0)
+	URL, err := getPictureURL(dbquerier, 0)
 	if err != nil {
 		fmt.Fprint(w, err)
 		return
@@ -32,7 +32,7 @@ func redirectToHD(w http.ResponseWriter, r *http.Request) {
 }
 
 func redirectToUHD(w http.ResponseWriter, r *http.Request) {
-	URL, err := getPictureURL(dbqueryer, 1)
+	URL, err := getPictureURL(dbquerier, 1)
 	if err != nil {
 		fmt.Fprint(w, err)
 		return
