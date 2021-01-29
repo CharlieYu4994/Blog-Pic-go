@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 	"time"
 )
@@ -85,9 +84,8 @@ func main() {
 	http.HandleFunc("/", homePage)
 	http.HandleFunc("/HDRES/", redirectToHD)
 	http.HandleFunc("/UHDRES/", redirectToUHD)
+	http.HandleFunc("/RANDOM/", redirectToRANDOM)
 	time.Sleep(time.Second)
-	fmt.Println("Done")
-	fmt.Println(picBuffer)
 	if conf.EnableTLS {
 		http.ListenAndServeTLS("0.0.0.0:"+conf.Port,
 			conf.CertPath, conf.KeyPath, nil)
