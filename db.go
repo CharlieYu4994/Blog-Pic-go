@@ -7,7 +7,7 @@ import (
 )
 
 type inserter func(date, hdURL, uhdURL string) error
-type querier func(date string) (*picture, error)
+type querier func(num int) ([]picture, error)
 type validator func(date string) (bool, error)
 
 func newInserter(db *sql.DB) (inserter, error) {
@@ -22,20 +22,30 @@ func newInserter(db *sql.DB) (inserter, error) {
 }
 
 func newQuerier(db *sql.DB) querier {
-	return func(date string) (*picture, error) {
-		res := db.QueryRow("SELECT Date,HDURL,UHDURL FROM Pictures WHERE Date = ?", date)
-		tmp := &picture{}
-		err := res.Scan(&tmp.DATE, &tmp.HDURL, &tmp.UHDURL)
+	return func(num int) ([]picture, error) {
+		res, err := db.Query(
+			"SELECT Date,HDURL,UHDURL FROM Pictures ORDER BY id DESC LIMIT ?", num)
 		if err != nil {
 			return nil, err
 		}
-		return tmp, err
+
+		ret := make([]picture, 0, num)
+		tmp := picture{}
+		for res.Next() {
+			err = res.Scan(&tmp.DATE, &tmp.HDURL, &tmp.UHDURL)
+			if err != nil {
+				return nil, err
+			}
+			ret = append(ret, tmp)
+		}
+		return ret, nil
 	}
 }
 
 func newValidator(db *sql.DB) validator {
 	return func(date string) (bool, error) {
-		res := db.QueryRow(`SELECT IFNULL((SELECT Date FROM Pictures WHERE Date=?), "NULL")`, date)
+		res := db.QueryRow(
+			`SELECT IFNULL((SELECT Date FROM Pictures WHERE Date=?), "NULL")`, date)
 		var tmp string
 		err := res.Scan(&tmp)
 		if err == nil {

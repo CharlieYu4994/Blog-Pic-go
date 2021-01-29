@@ -11,20 +11,34 @@ var dbinserter inserter
 var dbquerier querier
 var dbvalidator validator
 var conf config
+var picBuffer [7]picture
 
-func updatePic(i inserter, v validator) (err error) {
-	tmpPURL, tmpDATE, err := getPictureInfo(-1, 1, "zh-CN")
+func updetePicBuffer(q querier, num int) error {
+	tmp, err := q(num)
 	if err != nil {
-		return
+		return err
 	}
+	for index := 0; index < num; index++ {
+		picBuffer[index] = tmp[index]
+	}
+	return nil
+}
+
+func updatePic(i inserter, v validator) error {
+	tmpPURL, tmpDATE, err := getPictureInfo(-1, 9, "zh-CN")
+	if err != nil {
+		return err
+	}
+
 	tmpPICs := rewriteURL(tmpPURL, tmpDATE)
-	for _, tmpPIC := range tmpPICs {
+	for index := len(tmpPICs) - 1; index >= 0; index-- {
+		tmpPIC := tmpPICs[index]
 		status, _ := v(tmpPIC.DATE)
 		if status {
 			i(tmpPIC.DATE, tmpPIC.HDURL, tmpPIC.UHDURL)
 		}
 	}
-	return
+	return nil
 }
 
 func getDuration(hour int) time.Duration {
@@ -40,10 +54,11 @@ func getDuration(hour int) time.Duration {
 }
 
 func timeToUpdatePic() {
-	timer := time.NewTimer(time.Second * 10)
+	timer := time.NewTimer(0)
 	for {
 		<-timer.C
 		updatePic(dbinserter, dbvalidator)
+		updetePicBuffer(dbquerier, 7)
 		timer.Reset(getDuration(conf.UpdateTime))
 	}
 }
@@ -59,8 +74,10 @@ func init() {
 	}
 	dbquerier = newQuerier(db)
 	dbvalidator = newValidator(db)
-	readConf("./config.json", &conf)
-	fmt.Println(conf)
+	err = readConf("./config.json", &conf)
+	if err != nil {
+		panic("Open Config Error")
+	}
 	go timeToUpdatePic()
 }
 
@@ -68,6 +85,9 @@ func main() {
 	http.HandleFunc("/", homePage)
 	http.HandleFunc("/HDRES/", redirectToHD)
 	http.HandleFunc("/UHDRES/", redirectToUHD)
+	time.Sleep(time.Second)
+	fmt.Println("Done")
+	fmt.Println(picBuffer)
 	if conf.EnableTLS {
 		http.ListenAndServeTLS("0.0.0.0:"+conf.Port,
 			conf.CertPath, conf.KeyPath, nil)
