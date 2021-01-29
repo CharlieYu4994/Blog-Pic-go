@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"text/template"
 	"time"
 )
 
@@ -22,8 +23,9 @@ func redirectToRANDOM(w http.ResponseWriter, r *http.Request) {
 }
 
 func homePage(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w,
-		`Here is LassiCat's BingAPI.
-1920x1080: https://api.lassi-cat.cn:60443/HDRES
-UHD      : https://api.lassi-cat.cn:60443/UHDRES`)
+	tmpl, err := template.ParseFiles("./Web/template.html")
+	if err != nil {
+		fmt.Fprintln(w, err)
+	}
+	tmpl.Execute(w, conf.HTML)
 }

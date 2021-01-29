@@ -14,6 +14,10 @@ type config struct {
 	KeyPath    string `json:"keypath"`
 	Port       string `json:"port"`
 	UpdateTime int    `json:"updatetime"`
+	HTML       struct {
+		SiteName string `json:"sitename"`
+		Footer   string `json:"footer"`
+	}
 }
 
 func readConf(path string, conf *config) error {
