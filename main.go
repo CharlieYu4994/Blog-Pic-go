@@ -81,7 +81,6 @@ func init() {
 }
 
 func main() {
-	http.HandleFunc("/", homePage)
 	http.HandleFunc("/HDRES/", redirectToHD)
 	http.HandleFunc("/UHDRES/", redirectToUHD)
 	http.HandleFunc("/RANDOM/", redirectToRANDOM)
