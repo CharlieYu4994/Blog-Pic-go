@@ -3,31 +3,56 @@ package main
 import (
 	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
 )
 
-func redirectToHD(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/HDRES/" {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-	http.Redirect(w, r, picBuffer[0].HDURL, 302)
-}
+func redirectToBing(w http.ResponseWriter, r *http.Request) {
+	var url string
+	var urls picture
 
-func redirectToUHD(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/UHDRES/" {
+	if r.URL.Path != "/bing" {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	http.Redirect(w, r, picBuffer[0].UHDURL, 302)
-}
 
-func redirectToRANDOM(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/RANDOM/" {
-		w.WriteHeader(http.StatusNotFound)
+	parm := r.URL.Query()
+	res, ok := parm["res"]
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	rand.Seed(time.Now().Unix())
-	index := rand.Intn(len(picBuffer) - 1)
-	http.Redirect(w, r, picBuffer[index].HDURL, 302)
+	datT, ok := parm["dat"]
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	dat, err := strconv.Atoi(datT[0])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if dat <= len(picBuffer)-1 && dat >= 0 {
+		urls = picBuffer[dat]
+	} else if dat == -1 {
+		rand.Seed(time.Now().Unix())
+		i := rand.Intn(len(picBuffer) - 1)
+		urls = picBuffer[i]
+	} else {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	switch res[0] {
+	case "hdres":
+		url = urls.HDURL
+	case "uhdres":
+		url = urls.UHDURL
+	default:
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	http.Redirect(w, r, url, http.StatusFound)
 }

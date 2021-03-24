@@ -14,17 +14,13 @@ type config struct {
 	KeyPath    string `json:"keypath"`
 	Port       string `json:"port"`
 	UpdateTime int    `json:"updatetime"`
-	HTML       struct {
-		SiteName string `json:"sitename"`
-		Footer   string `json:"footer"`
-	}
 }
 
 func readConf(path string, conf *config) error {
 	_, err := os.Stat(path)
 	if err != nil || os.IsExist(err) {
 		fmt.Println("Error No Config File")
-		return errors.New("Error No Config File")
+		return errors.New("ErrorNoConfigFile")
 	}
 	tmp, err := ioutil.ReadFile(path)
 	if err != nil {

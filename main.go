@@ -81,9 +81,7 @@ func init() {
 }
 
 func main() {
-	http.HandleFunc("/HDRES/", redirectToHD)
-	http.HandleFunc("/UHDRES/", redirectToUHD)
-	http.HandleFunc("/RANDOM/", redirectToRANDOM)
+	http.HandleFunc("/bing", redirectToBing)
 	time.Sleep(time.Second)
 	if conf.EnableTLS {
 		http.ListenAndServeTLS("0.0.0.0:"+conf.Port,
