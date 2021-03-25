@@ -40,13 +40,13 @@ func updatePic(i inserter, v validator) error {
 	return nil
 }
 
-func getDuration(hour int) time.Duration {
+func getDuration(t int) time.Duration {
 	now := time.Now()
-	tmp := time.Duration(hour) * time.Hour
+	tmp := time.Duration(t) * time.Hour
 	tstr := now.Format("20060102")
 	next, _ := time.ParseInLocation("20060102", tstr, time.Local)
 	dur := next.Add(tmp + time.Second*10).Sub(now)
-	if now.Hour() >= hour {
+	if now.Hour() >= t {
 		return dur + time.Hour*24
 	}
 	return dur
@@ -63,7 +63,12 @@ func timeToUpdatePic() {
 }
 
 func init() {
-	db, err := sql.Open("sqlite", "./picture.db")
+	err := readConf("./config.json", &conf)
+	if err != nil {
+		panic("Open Config Error")
+	}
+
+	db, err := sql.Open("sqlite", conf.DataBase)
 	if err != nil {
 		panic("Open Database Error")
 	}
@@ -73,10 +78,7 @@ func init() {
 	}
 	dbquerier = newQuerier(db)
 	dbvalidator = newValidator(db)
-	err = readConf("./config.json", &conf)
-	if err != nil {
-		panic("Open Config Error")
-	}
+
 	go timeToUpdatePic()
 }
 

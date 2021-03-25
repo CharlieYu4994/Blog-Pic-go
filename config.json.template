@@ -4,6 +4,7 @@
     "keypath": "/path/to/your/key/file",
     "updatetime": "",
     "port": "9090",
+    "database": "./picture.db"
 }
 //you can use relative path as well as absolute path
 //if you set enabletls to false the pathes will be ignore
