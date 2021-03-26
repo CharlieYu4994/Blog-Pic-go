@@ -2,9 +2,10 @@
     "enabletls": true,
     "certpath": "/path/to/your/crt/file",
     "keypath": "/path/to/your/key/file",
-    "updatetime": "",
+    "updatetime": 1,
     "port": "9090",
-    "database": "./picture.db"
+    "database": "./picture.db",
+    "picnum": 7
 }
 //you can use relative path as well as absolute path
 //if you set enabletls to false the pathes will be ignore
