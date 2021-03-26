@@ -3,11 +3,11 @@ package main
 import (
 	"database/sql"
 
-	_ "modernc.org/sqlite"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type inserter func(date, hdURL, uhdURL string) error
-type querier func(num int) ([]picture, error)
+type querier func(n int) ([]picture, error)
 type validator func(date string) (bool, error)
 
 func newInserter(db *sql.DB) (inserter, error) {
@@ -22,14 +22,14 @@ func newInserter(db *sql.DB) (inserter, error) {
 }
 
 func newQuerier(db *sql.DB) querier {
-	return func(num int) ([]picture, error) {
+	return func(n int) ([]picture, error) {
 		res, err := db.Query(
-			"SELECT Date,HDURL,UHDURL FROM Pictures ORDER BY id DESC LIMIT ?", num)
+			"SELECT Date,HDURL,UHDURL FROM Pictures ORDER BY id DESC LIMIT ?", n)
 		if err != nil {
 			return nil, err
 		}
 
-		ret := make([]picture, 0, num)
+		ret := make([]picture, 0, n)
 		tmp := picture{}
 		for res.Next() {
 			err = res.Scan(&tmp.DATE, &tmp.HDURL, &tmp.UHDURL)
@@ -39,11 +39,9 @@ func newQuerier(db *sql.DB) querier {
 			ret = append(ret, tmp)
 		}
 
-		if len(ret) < num {
-			t := num - len(ret)
-			for t > 0 {
+		if n-len(ret) > 0 {
+			for t := n - len(ret); t > 0; t-- {
 				ret = append(ret, tmp)
-				t--
 			}
 		}
 

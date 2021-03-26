@@ -9,6 +9,7 @@ import (
 var dbinserter inserter
 var dbquerier querier
 var dbvalidator validator
+
 var conf config
 var bingHandler handler
 

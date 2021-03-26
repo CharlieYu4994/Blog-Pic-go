@@ -20,17 +20,17 @@ func getDuration(t int) time.Duration {
 }
 
 func updatePic(i inserter, v validator) error {
-	tmpPURL, tmpDATE, err := getPictureInfo(-1, 9, "zh-CN")
+	tPURL, tDATE, err := getPictureInfo("zh-CN")
 	if err != nil {
 		return err
 	}
+	tBuf := rewriteURL(tPURL, tDATE)
 
-	tmpPICs := rewriteURL(tmpPURL, tmpDATE)
-	for index := len(tmpPICs) - 1; index >= 0; index-- {
-		tmpPIC := tmpPICs[index]
-		status, _ := v(tmpPIC.DATE)
+	for j := len(tBuf) - 1; j >= 0; j-- {
+		tmp := tBuf[j]
+		status, _ := v(tmp.DATE)
 		if status {
-			i(tmpPIC.DATE, tmpPIC.HDURL, tmpPIC.UHDURL)
+			i(tmp.DATE, tmp.HDURL, tmp.UHDURL)
 		}
 	}
 	return nil
@@ -90,13 +90,14 @@ func (h *handler) redirectToPic(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, url, http.StatusFound)
 }
 
-func (h *handler) updetePicBuffer(q querier, num int) error {
-	tmp, err := q(num)
+func (h *handler) updetePicBuffer(q querier, n int) error {
+	tmp, err := q(n)
 	if err != nil {
 		return err
 	}
-	for index := 0; index < num; index++ {
-		h.pic[index] = tmp[index]
+
+	for i := 0; i < n; i++ {
+		h.pic[i] = tmp[i]
 	}
 	return nil
 }

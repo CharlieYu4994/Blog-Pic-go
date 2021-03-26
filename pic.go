@@ -17,21 +17,21 @@ type picture struct {
 	HDURL, UHDURL, DATE string
 }
 
-func getPictureInfo(idx int, num int, mkt string) (pURL []string, date []string, err error) {
-	gURL := fmt.Sprintf(
-		"%s/HPImageArchive.aspx?format=js&idx=%d&n=%d&mkt=%s", domain, idx, num, mkt)
+func getPictureInfo(mkt string) (pURL []string, date []string, err error) {
+	gURL := fmt.Sprintf("%s/HPImageArchive.aspx?format=js&idx=-1&n=9&mkt=%s", domain, mkt)
 
 	response, err := http.Get(gURL)
 	if err != nil {
 		return nil, nil, err
 	}
+
 	msg, err := ioutil.ReadAll(response.Body)
 	response.Body.Close()
 	if err != nil {
 		return nil, nil, err
 	}
 
-	var tmp *struct {
+	var tmp struct {
 		Images []struct {
 			Urlbase string `json:"urlbase"`
 			Enddate string `json:"enddate"`
@@ -49,8 +49,10 @@ func getPictureInfo(idx int, num int, mkt string) (pURL []string, date []string,
 	return pURL, date, nil
 }
 
-func rewriteURL(pURL []string, date []string) (pic []picture) {
-	tmp := picture{}
+func rewriteURL(pURL []string, date []string) []picture {
+	var tmp picture
+	var pic []picture
+
 	for i := 0; i < len(pURL); i++ {
 		st := domain + pURL[i]
 		tmp.HDURL = st + hdSuffix
@@ -58,5 +60,5 @@ func rewriteURL(pURL []string, date []string) (pic []picture) {
 		tmp.DATE = date[i]
 		pic = append(pic, tmp)
 	}
-	return
+	return pic
 }
