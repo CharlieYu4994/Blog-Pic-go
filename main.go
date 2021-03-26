@@ -29,7 +29,7 @@ func init() {
 	dbquerier = newQuerier(db)
 	dbvalidator = newValidator(db)
 
-	tmp := make([]*picture, conf.PicNum)
+	tmp := make([]picture, conf.PicNum)
 	bingHandler.pic = tmp
 
 	go bingHandler.timeToUpdatePic()

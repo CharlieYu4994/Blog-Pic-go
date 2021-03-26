@@ -4,3 +4,4 @@ Bing-API-go
 *.sql
 config.json
 picture.db
+.vscode/*

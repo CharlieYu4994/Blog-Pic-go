@@ -49,8 +49,8 @@ func getPictureInfo(idx int, num int, mkt string) (pURL []string, date []string,
 	return pURL, date, nil
 }
 
-func rewriteURL(pURL []string, date []string) (pic []*picture) {
-	tmp := &picture{}
+func rewriteURL(pURL []string, date []string) (pic []picture) {
+	tmp := picture{}
 	for i := 0; i < len(pURL); i++ {
 		st := domain + pURL[i]
 		tmp.HDURL = st + hdSuffix

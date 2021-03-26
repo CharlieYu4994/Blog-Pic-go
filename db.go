@@ -7,7 +7,7 @@ import (
 )
 
 type inserter func(date, hdURL, uhdURL string) error
-type querier func(num int) ([]*picture, error)
+type querier func(num int) ([]picture, error)
 type validator func(date string) (bool, error)
 
 func newInserter(db *sql.DB) (inserter, error) {
@@ -22,15 +22,15 @@ func newInserter(db *sql.DB) (inserter, error) {
 }
 
 func newQuerier(db *sql.DB) querier {
-	return func(num int) ([]*picture, error) {
+	return func(num int) ([]picture, error) {
 		res, err := db.Query(
 			"SELECT Date,HDURL,UHDURL FROM Pictures ORDER BY id DESC LIMIT ?", num)
 		if err != nil {
 			return nil, err
 		}
 
-		ret := make([]*picture, 0, num)
-		tmp := &picture{}
+		ret := make([]picture, 0, num)
+		tmp := picture{}
 		for res.Next() {
 			err = res.Scan(&tmp.DATE, &tmp.HDURL, &tmp.UHDURL)
 			if err != nil {
@@ -38,6 +38,15 @@ func newQuerier(db *sql.DB) querier {
 			}
 			ret = append(ret, tmp)
 		}
+
+		if len(ret) < num {
+			t := num - len(ret)
+			for t > 0 {
+				ret = append(ret, tmp)
+				t--
+			}
+		}
+
 		return ret, nil
 	}
 }

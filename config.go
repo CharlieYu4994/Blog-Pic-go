@@ -10,7 +10,7 @@ import (
 type config struct {
 	EnableTLS  bool   `json:"enabletls"`
 	UpdateTime int    `json:"updatetime"`
-	PicNum     int    `json:"PicNum"`
+	PicNum     int    `json:"picnum"`
 	CertPath   string `json:"certpath"`
 	KeyPath    string `json:"keypath"`
 	Port       string `json:"port"`

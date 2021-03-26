@@ -37,12 +37,12 @@ func updatePic(i inserter, v validator) error {
 }
 
 type handler struct {
-	pic []*picture
+	pic []picture
 }
 
 func (h *handler) redirectToPic(w http.ResponseWriter, r *http.Request) {
 	var url string
-	var urls *picture
+	var urls picture
 
 	if r.URL.Path != "/bing" {
 		w.WriteHeader(http.StatusNotFound)
@@ -106,7 +106,7 @@ func (h *handler) timeToUpdatePic() {
 	for {
 		<-timer.C
 		updatePic(dbinserter, dbvalidator)
-		h.updetePicBuffer(dbquerier, 7)
+		h.updetePicBuffer(dbquerier, conf.PicNum)
 		timer.Reset(getDuration(conf.UpdateTime))
 	}
 }
