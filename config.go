@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"os"
 )
@@ -20,7 +19,7 @@ type config struct {
 func readConf(path string, conf *config) error {
 	_, err := os.Stat(path)
 	if err != nil || os.IsExist(err) {
-		return errors.New("ErrorNoConfigFile")
+		return err
 	}
 	tmp, err := ioutil.ReadFile(path)
 	if err != nil {

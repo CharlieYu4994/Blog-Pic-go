@@ -19,7 +19,7 @@ func init() {
 		panic("Open Config Error")
 	}
 
-	db, err := sql.Open("sqlite", conf.DataBase)
+	db, err := sql.Open("sqlite3", conf.DataBase)
 	if err != nil {
 		panic("Open Database Error")
 	}
@@ -32,6 +32,7 @@ func init() {
 
 	tmp := make([]picture, conf.PicNum)
 	bingHandler.pic = tmp
+	bingHandler.urlbase = "/bing"
 
 	go bingHandler.timeToUpdatePic()
 }

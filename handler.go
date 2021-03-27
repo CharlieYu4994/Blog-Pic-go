@@ -7,6 +7,12 @@ import (
 	"time"
 )
 
+const (
+	hdSuffix  string = "_1920x1080.jpg"
+	uhdSuffix string = "_UHD.jpg"
+	domain    string = "https://cn.bing.com"
+)
+
 func getDuration(t int) time.Duration {
 	now := time.Now()
 	tmp := time.Duration(t) * time.Hour
@@ -20,31 +26,30 @@ func getDuration(t int) time.Duration {
 }
 
 func updatePic(i inserter, v validator) error {
-	tPURL, tDATE, err := getPictureInfo("zh-CN")
+	pics, err := getPictureInfo("zh-CN")
 	if err != nil {
 		return err
 	}
-	tBuf := rewriteURL(tPURL, tDATE)
 
-	for j := len(tBuf) - 1; j >= 0; j-- {
-		tmp := tBuf[j]
-		status, _ := v(tmp.DATE)
+	for j := len(pics) - 1; j >= 0; j-- {
+		status, _ := v(pics[j].Date)
 		if status {
-			i(tmp.DATE, tmp.HDURL, tmp.UHDURL)
+			i(pics[j].Date, pics[j].Burl)
 		}
 	}
 	return nil
 }
 
 type handler struct {
-	pic []picture
+	urlbase string
+	pic     []picture
 }
 
 func (h *handler) redirectToPic(w http.ResponseWriter, r *http.Request) {
 	var url string
 	var urls picture
 
-	if r.URL.Path != "/bing" {
+	if r.URL.Path != h.urlbase {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -79,12 +84,11 @@ func (h *handler) redirectToPic(w http.ResponseWriter, r *http.Request) {
 
 	switch res[0] {
 	case "hdres":
-		url = urls.HDURL
+		url = domain + urls.Burl + hdSuffix
 	case "uhdres":
-		url = urls.UHDURL
+		url = domain + urls.Burl + uhdSuffix
 	default:
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		url = domain + urls.Burl + "_" + res[0] + ".jpg"
 	}
 
 	http.Redirect(w, r, url, http.StatusFound)

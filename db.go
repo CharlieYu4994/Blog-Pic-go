@@ -6,17 +6,17 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type inserter func(date, hdURL, uhdURL string) error
+type inserter func(date, BURL string) error
 type querier func(n int) ([]picture, error)
 type validator func(date string) (bool, error)
 
 func newInserter(db *sql.DB) (inserter, error) {
-	cmd, err := db.Prepare("INSERT INTO Pictures(Date, HDURL, UHDURL)  values(?, ?, ?)")
+	cmd, err := db.Prepare("INSERT INTO BING(DATE, BURL)  values(?, ?)")
 	if err != nil {
 		return nil, err
 	}
-	return func(date, hdURL, uhdURL string) error {
-		_, err = cmd.Exec(date, hdURL, uhdURL)
+	return func(date, BURL string) error {
+		_, err = cmd.Exec(date, BURL)
 		return err
 	}, nil
 }
@@ -24,15 +24,15 @@ func newInserter(db *sql.DB) (inserter, error) {
 func newQuerier(db *sql.DB) querier {
 	return func(n int) ([]picture, error) {
 		res, err := db.Query(
-			"SELECT Date,HDURL,UHDURL FROM Pictures ORDER BY id DESC LIMIT ?", n)
+			"SELECT DATE,BURL FROM BING ORDER BY id DESC LIMIT ?", n)
 		if err != nil {
 			return nil, err
 		}
 
 		ret := make([]picture, 0, n)
-		tmp := picture{}
+		var tmp picture
 		for res.Next() {
-			err = res.Scan(&tmp.DATE, &tmp.HDURL, &tmp.UHDURL)
+			err = res.Scan(&tmp.Date, &tmp.Burl)
 			if err != nil {
 				return nil, err
 			}
@@ -52,7 +52,7 @@ func newQuerier(db *sql.DB) querier {
 func newValidator(db *sql.DB) validator {
 	return func(date string) (bool, error) {
 		res := db.QueryRow(
-			`SELECT IFNULL((SELECT Date FROM Pictures WHERE Date=?), "NULL")`, date)
+			`SELECT IFNULL((SELECT Date FROM BING WHERE Date=?), "NULL")`, date)
 		var tmp string
 		err := res.Scan(&tmp)
 		if err == nil {
