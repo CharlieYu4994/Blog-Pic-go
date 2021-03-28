@@ -19,7 +19,7 @@
 2. res (optional)
    + hdres：1080p 分辨率的图片
    + uhdres：当天的最高分辨率，分辨率不定
-   + heightxwidth：自定义分辨率（必须被 Bing 官方支持）
+   + <height>x<width>：自定义分辨率（必须被 Bing 官方支持）
    + 可以不提供，不提供默认为 `hdres`
 
 
