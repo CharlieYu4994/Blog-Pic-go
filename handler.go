@@ -57,13 +57,11 @@ func (h *handler) redirectToPic(w http.ResponseWriter, r *http.Request) {
 	parm := r.URL.Query()
 	res, ok := parm["res"]
 	if !ok {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		res = append(res, "hdres")
 	}
 	datT, ok := parm["dat"]
 	if !ok {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		datT = append(datT, "0")
 	}
 	dat, err := strconv.Atoi(datT[0])
 	if err != nil {
@@ -71,15 +69,14 @@ func (h *handler) redirectToPic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if dat <= len(h.pic)-1 && dat >= 0 {
+	if dat < len(h.pic) && dat >= 0 {
 		urls = h.pic[dat]
 	} else if dat == -1 {
 		rand.Seed(time.Now().Unix())
 		i := rand.Intn(len(h.pic) - 1)
 		urls = h.pic[i]
 	} else {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		urls = h.pic[len(h.pic)-1]
 	}
 
 	switch res[0] {

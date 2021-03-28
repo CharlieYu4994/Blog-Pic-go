@@ -40,11 +40,10 @@ func newQuerier(db *sql.DB) querier {
 		}
 
 		if n-len(ret) > 0 {
-			for t := n - len(ret); t > 0; t-- {
-				ret = append(ret, tmp)
+			for i := 0; i < n-len(ret); i++ {
+				ret = append(ret, ret[i])
 			}
 		}
-
 		return ret, nil
 	}
 }
