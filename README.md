@@ -62,6 +62,9 @@ bing-api.lassi-cat.cn:60443/bing
 
 ## 版权
 Bing 今日美图有微软 Bing 提供，**使用请注意版权，不可用于商业用途**
+
 本程序由 [@CharlieYu4994](https://blog.charlie.moe/) 编写，以 GPLv3 协议发布
+
+**本程序不支持，不鼓励一切商业用途**
 
 
