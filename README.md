@@ -52,6 +52,9 @@ bing-api.lassi-cat.cn:60443/bing
 ```
 ![Demo](https://bing-api.lassi-cat.cn:60443/bing)
 
+### 图像数据库
+在『main』分支下的『picture.db』为从2021年一月一日开始的图像，不定期更新。
+
 ### 对 BingAPI 的研究
 https://blog.charlie.moe/post/BingAPI-00/
 
