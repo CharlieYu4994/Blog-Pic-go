@@ -26,14 +26,14 @@ func getDuration(t int) time.Duration {
 }
 
 func updatePic(i inserter, v validator) error {
-	pics, err := getPictureInfo("zh-CN")
+	pics, err := getPicture("zh-CN")
 	if err != nil {
 		return err
 	}
 
 	for j := len(pics) - 1; j >= 0; j-- {
-		status, _ := v(pics[j].Date)
-		if status {
+		ok, _ := v(pics[j].Date)
+		if ok {
 			i(pics[j].Date, pics[j].Burl)
 		}
 	}

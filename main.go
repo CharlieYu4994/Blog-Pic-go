@@ -32,13 +32,13 @@ func init() {
 
 	tmp := make([]picture, conf.PicNum)
 	bingHandler.pic = tmp
-	bingHandler.urlbase = "/bing"
+	bingHandler.urlbase = "/" + conf.UrlBase
 
 	go bingHandler.timeToUpdatePic()
 }
 
 func main() {
-	http.HandleFunc("/bing", bingHandler.redirectToPic)
+	http.HandleFunc("/"+conf.UrlBase, bingHandler.redirectToPic)
 	time.Sleep(time.Second)
 	if conf.EnableTLS {
 		http.ListenAndServeTLS("0.0.0.0:"+conf.Port,

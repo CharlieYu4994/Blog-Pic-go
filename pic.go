@@ -12,7 +12,7 @@ type picture struct {
 	Burl string `json:"urlbase"`
 }
 
-func getPictureInfo(mkt string) (pics []picture, err error) {
+func getPicture(mkt string) (pics []picture, err error) {
 	gURL := fmt.Sprintf("%s/HPImageArchive.aspx?format=js&idx=-1&n=9&mkt=%s", domain, mkt)
 
 	response, err := http.Get(gURL)

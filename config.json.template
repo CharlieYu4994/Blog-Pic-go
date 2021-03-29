@@ -2,9 +2,10 @@
     "enabletls": true,
     "certpath": "/path/to/your/crt/file",
     "keypath": "/path/to/your/key/file",
-    "updatetime": 1,
+    "urlbase": "bing",
     "port": "9090",
     "database": "./picture.db",
+    "updatetime": 1,
     "picnum": 7
 }
 //you can use relative path as well as absolute path
