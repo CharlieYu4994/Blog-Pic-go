@@ -51,7 +51,7 @@
 bing-api.lassi-cat.cn:60443/bing
 ```
 ![Demo](https://bing-api.lassi-cat.cn:60443/bing)
-更多详情请查看 [Demo 主页](api.lassi-cat.cn)
+更多详情请查看 [Demo 主页](https://api.lassi-cat.cn)
 > 此 Demo 由 [LassiCat](https://github.com/LassiCat) 的服务器托管运行
 
 ### 图像数据库
