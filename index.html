@@ -5,22 +5,36 @@
     <meta charset="utf-8" />
     <link rel="stylesheet" type="text/css" href="https://www.layuicdn.com/layui/css/layui.css" />
     <style>
-        .moe:hover{color:pink}
+        .icp {
+            background-color: #393D49;
+            width: 100%;
+            height: 2em;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .moe {
+            color: white;
+        }
+
+        .moe:hover {
+            color: pink
+        }
     </style>
 </head>
 
 <body style="background-color: #eff5f9;">
     <ul class="layui-nav">
         <li class="layui-nav-item layui-this"><a href="./index.html">首页</a></li>
-	</ul>
+    </ul>
 
     <fieldset class="layui-elem-field layui-field-title layui-anim layui-anim-up" style="margin-top: 20px;">
-		<legend>Home</legend>
-	</fieldset>
+        <legend>Home</legend>
+    </fieldset>
     <div class="layui-fluid">
-        <div class="layui-row layui-col-space15 layui-anim layui-anim-up" id="menuList" >
+        <div class="layui-row layui-col-space15 layui-anim layui-anim-up" id="menuList">
             <div class="layui-col-xs12 layui-col-sm12 layui-col-md12">
-                    <img style="width: 100%; border-radius: 10px;" src="https://bing-api.lassi-cat.cn:60443/bing" />
+                <img style="width: 100%; border-radius: 10px;" src="https://bing-api.lassi-cat.cn:60443/bing" />
             </div>
             <div class="layui-col-xs12 layui-col-md3">
                 <div class="layui-card" style="border-radius: 10px;">
@@ -56,14 +70,16 @@
                 <div class="layui-card" style="border-radius: 10px;">
                     <div class="layui-card-header">关于</div>
                     <div class="layui-card-body">
-                        Lassi-Cat 的 Bing 美图 API <br/>
-                        <a class="moe" href="https://icp.gov.moe " target="_blank">萌ICP备</a>
-                        <a class="moe" href="https://icp.gov.moe/?keyword=20214994 " target="_blank"> 20214994号</a>
+                        Lassi-Cat 的 Bing 美图 API
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <div class="icp">
+        <a class="moe" href="https://icp.gov.moe " target="_blank">萌ICP备</a>
+        <a class="moe" href="https://icp.gov.moe/?keyword=20214994 " target="_blank"> 20214994号</a>
+        </div>
 </body>
 
 </html>
