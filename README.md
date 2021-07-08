@@ -51,11 +51,11 @@
 bing-api.lassi-cat.cn:60443/bing
 ```
 ![Demo](https://bing-api.lassi-cat.cn:60443/bing)
-更多详情请查看 [Demo 主页](https://api.lassi-cat.cn)
-> 此 Demo 由 [LassiCat](https://github.com/LassiCat) 的服务器托管运行
+更多详情请查看 [Demo 主页](https://bing.lassi-cat.cn)
+> 此 Demo 由 [LassiCat](https://github.com/LassiCat) 的服务器托管运行 ~~（其实就是咱的）~~
 
 ### 图像数据库
-在『main』分支下的『picture.db』为从2021年1月1日开始的图像，不定期更新
+在『main』分支下的『picture.db』为从2021年1月1日开始的图像，不定期更新 ~~(其实不更新)~~
 
 ### 对 BingAPI 的研究
 [对 BingAPI 的简单研究](https://blog.charlie.moe/post/BingAPI-00/)
