@@ -55,7 +55,11 @@ api.lassi-cat.cn:60443/bingapi/bing?dat=<date>&res=<resolution>
 > 此 Demo 由 [LassiCat](https://github.com/LassiCat) 的服务器托管运行 ~~（其实就是咱的）~~
 
 ### 图像数据库
-在『main』分支下的『picture.db』为从2021年1月1日开始的图像，不定期更新 ~~(其实不更新)~~
+~~在『main』分支下的『picture.db』为从2021年1月1日开始的图像，不定期更新 (其实不更新)~~
+
+请使用 [Bing-API-db](https://github.com/CharlieYu4994/Bing-API-db) 提供的数据
+
+[点击](https://github.com/CharlieYu4994/Bing-API-db/releases/latest/download/picture.db) 下载最新数据库
 
 ### 对 BingAPI 的研究
 [对 BingAPI 的简单研究](https://blog.charlie.moe/post/BingAPI-00/)
