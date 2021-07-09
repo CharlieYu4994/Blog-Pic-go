@@ -51,7 +51,7 @@
 api.lassi-cat.cn:60443/bingapi/bing?dat=<date>&res=<resolution>
 ```
 ![Demo](https://api.lassi-cat.cn:60443/bingapi/bing)
-更多详情请查看 [Demo 主页](https://bing.lassi-cat.cn)
+更多详情请查看 [Demo 主页](https://bing.charlie.moe)
 > 此 Demo 由 [LassiCat](https://github.com/LassiCat) 的服务器托管运行 ~~（其实就是咱的）~~
 
 ### 图像数据库
