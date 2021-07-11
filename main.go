@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"flag"
 	"net/http"
 	"time"
 )
@@ -11,10 +12,15 @@ var dbquerier querier
 var dbvalidator validator
 
 var conf config
+var confpath string
 var bingHandler handler
 
 func init() {
-	err := readConf("./config.json", &conf)
+	flag.StringVar(&confpath, "c", "./config.json", "Set the config path")
+
+	flag.Parse()
+
+	err := readConf(confpath, &conf)
 	if err != nil {
 		panic("Open Config Error")
 	}
@@ -34,7 +40,7 @@ func init() {
 	bingHandler.pic = tmp
 	bingHandler.urlbase = "/" + conf.UrlBase
 
-	go bingHandler.timeToUpdatePic()
+	go bingHandler.timeToUpdatePic(conf.UpdateTime, conf.PicNum)
 }
 
 func main() {

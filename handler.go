@@ -103,12 +103,12 @@ func (h *handler) updetePicBuffer(q querier, n int) error {
 	return nil
 }
 
-func (h *handler) timeToUpdatePic() {
+func (h *handler) timeToUpdatePic(dur, num int) {
 	timer := time.NewTimer(0)
 	for {
 		<-timer.C
 		updatePic(dbinserter, dbvalidator)
-		h.updetePicBuffer(dbquerier, conf.PicNum)
-		timer.Reset(getDuration(conf.UpdateTime))
+		h.updetePicBuffer(dbquerier, num)
+		timer.Reset(getDuration(dur))
 	}
 }
