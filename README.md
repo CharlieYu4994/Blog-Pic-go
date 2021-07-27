@@ -1,5 +1,5 @@
-# Bing-API-go
-![Go](https://img.shields.io/github/go-mod/go-version/CharlieYu4994/Bing-API-go)![GPLv3](https://img.shields.io/github/license/CharlieYu4994/Bing-API-go) ![GitHub last commit](https://img.shields.io/github/last-commit/CharlieYu4994/Bing-API-go)
+# Rand-Pic-go
+![Go](https://img.shields.io/github/go-mod/go-version/CharlieYu4994/Rand-Pic-go)![GPLv3](https://img.shields.io/github/license/CharlieYu4994/Rand-Pic-go) ![GitHub last commit](https://img.shields.io/github/last-commit/CharlieYu4994/Rand-Pic-go)
 
 一个潦草的 Bing 每日一图 API 的 Go 语言实现，并提供图片地址持久化存储
 
@@ -14,13 +14,13 @@
 + Go 编译环境 (optional 仅在需要自行编译时需要)
 
 ### 提供二进制文件
-1. 在 [Release](https://github.com/CharlieYu4994/Bing-API-go/releases) 页面下载二进制文件
+1. 在 [Release](https://github.com/CharlieYu4994/Rand-Pic-go/releases) 页面下载二进制文件
 2. 根据『config.json.template』创建配置文件
 3. 将数据库、配置文件、二进制文件放在同一目录下运行
 4. 访问 `your.domain/bing` 查看效果
 
 ### 不提供二进制文件
-1. 在 [Release](https://github.com/CharlieYu4994/Bing-API-go/releases) 页面下载源码
+1. 在 [Release](https://github.com/CharlieYu4994/Rand-Pic-go/releases) 页面下载源码
 2. 解压并进入文件夹
 3. 在文件夹下运行 `go build ./`
 4. 根据『config.json.template』创建配置文件
