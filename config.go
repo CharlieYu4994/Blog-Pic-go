@@ -14,7 +14,6 @@ type config struct {
 	KeyPath    string `json:"keypath"`
 	Port       string `json:"port"`
 	DataBase   string `json:"database"`
-	UrlBase    string `json:"urlbase"`
 }
 
 func readConf(path string, conf *config) error {

@@ -2,7 +2,6 @@
     "enabletls": true,
     "certpath": "/path/to/your/crt/file",
     "keypath": "/path/to/your/key/file",
-    "urlbase": "bing",
     "port": "9090",
     "database": "./picture.db",
     "updatetime": 1,

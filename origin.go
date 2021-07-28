@@ -20,51 +20,36 @@
 package main
 
 import (
-	"database/sql"
-	"flag"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
-	"time"
 )
 
-const domain string = "https://cn.bing.com"
+func getBing() (pics []picture, err error) {
+	gURL := fmt.Sprintf("%s/HPImageArchive.aspx?format=js&idx=-1&n=9&mkt=zh-CN", domain)
 
-var conf config
-var confpath string
-
-var bingHandler handler
-
-func init() {
-	flag.StringVar(&confpath, "c", "./config.json", "Set the config path")
-
-	flag.Parse()
-
-	err := readConf(confpath, &conf)
+	response, err := http.Get(gURL)
 	if err != nil {
-		panic("OpenConfigError")
+		return nil, err
 	}
 
-	db, err := sql.Open("sqlite3", conf.DataBase)
+	msg, err := ioutil.ReadAll(response.Body)
+	response.Body.Close()
 	if err != nil {
-		panic("OpenDatabaseError")
+		return nil, err
 	}
 
-	bingHandler, err := newHandler("bing", conf.PicNum, true, getBing, db)
-	if err != nil {
-		panic("CreateHandlerError")
+	var tmp struct {
+		Images []picture
 	}
-
-	go bingHandler.cronTask(conf.UpdateTime)
+	err = json.Unmarshal(msg, &tmp)
+	if err != nil {
+		return nil, err
+	}
+	return tmp.Images, nil
 }
 
-func main() {
-	http.HandleFunc(bingHandler.name, bingHandler.redirect)
-
-	time.Sleep(time.Second)
-
-	if conf.EnableTLS {
-		http.ListenAndServeTLS("0.0.0.0:"+conf.Port,
-			conf.CertPath, conf.KeyPath, nil)
-	} else {
-		http.ListenAndServe("0.0.0.0:"+conf.Port, nil)
-	}
+func getAPOD() (pics []picture, err error) {
+	return nil, nil
 }

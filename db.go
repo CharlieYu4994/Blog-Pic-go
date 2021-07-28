@@ -1,65 +1,106 @@
+/**
+ * Copyright (C) 2021 CharlieYu4994
+ *
+ * This file is part of Blog-Pic-go.
+ *
+ * Blog-Pic-go is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Blog-Pic-go is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Blog-Pic-go.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package main
 
 import (
 	"database/sql"
-
-	_ "github.com/mattn/go-sqlite3"
+	"fmt"
 )
 
-type inserter func(date, BURL string) error
-type querier func(n int) ([]picture, error)
-type validator func(date string) (bool, error)
+type insertFunc func(date, baseURL string) error
+type queryFunc func(num int) ([]picture, error)
+type checkFunc func(date string) (bool, error)
 
-func newInserter(db *sql.DB) (inserter, error) {
-	cmd, err := db.Prepare("INSERT INTO BING(DATE, BURL)  values(?, ?)")
+type dbOperator struct {
+	insert insertFunc
+	query  queryFunc
+	check  checkFunc
+}
+
+type picture struct {
+	Date    string `json:"enddate"`
+	BaseURL string `json:"urlbase"`
+}
+
+func newDbOperator(db *sql.DB, table string) (*dbOperator, error) {
+	insertCmd, err := db.Prepare(
+		fmt.Sprintf("INSERT INTO %s(DATE, BURL)  values(?, ?)", table))
 	if err != nil {
 		return nil, err
 	}
-	return func(date, BURL string) error {
-		_, err = cmd.Exec(date, BURL)
-		return err
-	}, nil
-}
 
-func newQuerier(db *sql.DB) querier {
-	return func(n int) ([]picture, error) {
-		res, err := db.Query(
-			"SELECT DATE,BURL FROM BING ORDER BY id DESC LIMIT ?", n)
-		if err != nil {
-			return nil, err
-		}
+	queryCmd, err := db.Prepare(
+		fmt.Sprintf("SELECT DATE,BURL FROM %s ORDER BY id DESC LIMIT ?", table))
+	if err != nil {
+		return nil, err
+	}
 
-		ret := make([]picture, 0, n)
-		var tmp picture
-		for res.Next() {
-			err = res.Scan(&tmp.Date, &tmp.Burl)
+	checkCmd, err := db.Prepare(
+		fmt.Sprintf(`SELECT IFNULL((SELECT Date FROM %s WHERE Date=?), "NULL")`, table))
+	if err != nil {
+		return nil, err
+	}
+
+	return &dbOperator{
+		insert: func(date, baseURL string) error {
+			_, err := insertCmd.Exec(date, baseURL)
+			return err
+		},
+
+		query: func(num int) ([]picture, error) {
+			var pic picture
+			tmp := make([]picture, 0, num)
+
+			result, err := queryCmd.Query(num)
 			if err != nil {
 				return nil, err
 			}
-			ret = append(ret, tmp)
-		}
 
-		if n-len(ret) > 0 {
-			for i := 0; i < n-len(ret); i++ {
-				ret = append(ret, ret[i])
+			for result.Next() {
+				err := result.Scan(&pic.Date, &pic.BaseURL)
+				if err != nil {
+					return nil, err
+				}
+				tmp = append(tmp, pic)
 			}
-		}
-		return ret, nil
-	}
-}
 
-func newValidator(db *sql.DB) validator {
-	return func(date string) (bool, error) {
-		res := db.QueryRow(
-			`SELECT IFNULL((SELECT Date FROM BING WHERE Date=?), "NULL")`, date)
-		var tmp string
-		err := res.Scan(&tmp)
-		if err == nil {
-			if tmp == "NULL" {
-				return true, nil
+			if num-len(tmp) > 0 {
+				for i := 0; i < num-len(tmp); i++ {
+					tmp = append(tmp, tmp[i])
+				}
 			}
-			return false, nil
-		}
-		return false, err
-	}
+			return tmp, nil
+		},
+
+		check: func(date string) (bool, error) {
+			var tmp string
+
+			result := checkCmd.QueryRow(date)
+			err := result.Scan(&tmp)
+			if err == nil {
+				if tmp == "NULL" {
+					return true, nil
+				}
+				return false, nil
+			}
+			return false, err
+		},
+	}, nil
 }

@@ -1,114 +1,143 @@
+/**
+ * Copyright (C) 2021 CharlieYu4994
+ *
+ * This file is part of Blog-Pic-go.
+ *
+ * Blog-Pic-go is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Blog-Pic-go is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Blog-Pic-go.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package main
 
 import (
+	"database/sql"
 	"math/rand"
 	"net/http"
 	"strconv"
 	"time"
 )
 
-const (
-	hdSuffix  string = "_1920x1080.jpg"
-	uhdSuffix string = "_UHD.jpg"
-	domain    string = "https://cn.bing.com"
-)
-
-func getDuration(t int) time.Duration {
-	now := time.Now()
-	tmp := time.Duration(t) * time.Hour
-	tstr := now.Format("20060102")
-	next, _ := time.ParseInLocation("20060102", tstr, time.Local)
-	dur := next.Add(tmp + time.Second*10).Sub(now)
-	if now.Hour() >= t {
-		return dur + time.Hour*24
-	}
-	return dur
-}
-
-func updatePic(i inserter, v validator) error {
-	pics, err := getPicture("zh-CN")
-	if err != nil {
-		return err
-	}
-
-	for j := len(pics) - 1; j >= 0; j-- {
-		ok, _ := v(pics[j].Date)
-		if ok {
-			i(pics[j].Date, pics[j].Burl)
-		}
-	}
-	return nil
-}
+type updateFunc func() ([]picture, error)
 
 type handler struct {
-	urlbase string
+	name    string
+	picNum  int
 	pic     []picture
+	db      *dbOperator
+	update  updateFunc
+	withres bool
 }
 
-func (h *handler) redirectToPic(w http.ResponseWriter, r *http.Request) {
+func getDuration(t int) time.Duration {
+	dur := time.Duration(t) * time.Hour
+	now := time.Now()
+	tmp := now.Format("20060102")
+	today, _ := time.ParseInLocation("20060102", tmp, time.Local)
+	ret := today.Add(dur + time.Second*10).Sub(now)
+	if now.Hour() >= t {
+		return ret + time.Hour*24
+	}
+	return ret
+}
+
+func newHandler(name string, num int, withres bool, update updateFunc, db *sql.DB) (*handler, error) {
+	tmp, err := newDbOperator(db, name)
+	if err != nil {
+		return nil, err
+	}
+
+	return &handler{
+		name:    name,
+		pic:     make([]picture, 0, num),
+		db:      tmp,
+		update:  update,
+		withres: withres,
+	}, nil
+}
+
+func (h *handler) updatePics() bool {
+	pics, err := h.update()
+	if err != nil {
+		return false
+	}
+
+	for _, pic := range pics {
+		if ok, _ := h.db.check(pic.Date); ok {
+			h.db.insert(pic.Date, pic.BaseURL)
+		}
+	}
+	return true
+}
+
+func (h *handler) updateBuff() bool {
+	tmp, err := h.db.query(h.picNum)
+	if err != nil {
+		return false
+	}
+
+	for i, pic := range tmp {
+		h.pic[i] = pic
+	}
+	return true
+}
+
+func (h *handler) cronTask(dur int) {
+	timer := time.NewTimer(0)
+	for {
+		<-timer.C
+		h.updatePics()
+		h.updateBuff()
+		timer.Reset(getDuration(dur))
+	}
+}
+
+func (h *handler) redirect(w http.ResponseWriter, r *http.Request) {
 	var url string
-	var urls picture
+	var pic picture
 
-	if r.URL.Path != h.urlbase {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	parm := r.URL.Query()
-	res, ok := parm["res"]
+	args := r.URL.Query()
+	dat, ok := args["dat"]
 	if !ok {
-		res = append(res, "hdres")
+		dat = append(dat, "0")
 	}
-	datT, ok := parm["dat"]
-	if !ok {
-		datT = append(datT, "0")
-	}
-	dat, err := strconv.Atoi(datT[0])
+	offset, err := strconv.Atoi(dat[0])
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	if dat < len(h.pic) && dat >= 0 {
-		urls = h.pic[dat]
-	} else if dat == -1 {
+	if offset < h.picNum && offset > -1 {
+		pic = h.pic[offset]
+	} else if offset == -1 {
 		rand.Seed(time.Now().Unix())
 		i := rand.Intn(len(h.pic) - 1)
-		urls = h.pic[i]
+		pic = h.pic[i]
 	} else {
-		urls = h.pic[len(h.pic)-1]
+		pic = h.pic[h.picNum-1]
 	}
 
-	switch res[0] {
-	case "hdres":
-		url = domain + urls.Burl + hdSuffix
-	case "uhdres":
-		url = domain + urls.Burl + uhdSuffix
-	default:
-		url = domain + urls.Burl + "_" + res[0] + ".jpg"
-	}
+	if h.withres {
+		res, ok := args["res"]
+		if !ok {
+			res = append(res, "1920x1080")
+		}
 
+		switch res[0] {
+		case "uhdres":
+			url = domain + pic.BaseURL + "_UHD.jpg"
+		default:
+			url = domain + pic.BaseURL + "_" + res[0] + ".jpg"
+		}
+	}
 	http.Redirect(w, r, url, http.StatusFound)
-}
-
-func (h *handler) updetePicBuffer(q querier, n int) error {
-	tmp, err := q(n)
-	if err != nil {
-		return err
-	}
-
-	for i := 0; i < n; i++ {
-		h.pic[i] = tmp[i]
-	}
-	return nil
-}
-
-func (h *handler) timeToUpdatePic(dur, num int) {
-	timer := time.NewTimer(0)
-	for {
-		<-timer.C
-		updatePic(dbinserter, dbvalidator)
-		h.updetePicBuffer(dbquerier, num)
-		timer.Reset(getDuration(dur))
-	}
 }
