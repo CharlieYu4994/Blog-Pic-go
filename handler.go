@@ -27,10 +27,11 @@ import (
 	"time"
 )
 
-type updateFunc func() ([]picture, error)
+type updateFunc func(num int) ([]picture, bool)
 
 type handler struct {
 	name    string
+	base    string
 	picNum  int
 	pic     []picture
 	db      *dbOperator
@@ -50,7 +51,7 @@ func getDuration(t int) time.Duration {
 	return ret
 }
 
-func newHandler(name string, num int, withres bool, update updateFunc, db *sql.DB) (*handler, error) {
+func newHandler(name, base string, num int, res bool, u updateFunc, db *sql.DB) (*handler, error) {
 	tmp, err := newDbOperator(db, name)
 	if err != nil {
 		return nil, err
@@ -60,20 +61,20 @@ func newHandler(name string, num int, withres bool, update updateFunc, db *sql.D
 		name:    name,
 		pic:     make([]picture, 0, num),
 		db:      tmp,
-		update:  update,
-		withres: withres,
+		update:  u,
+		withres: res,
 	}, nil
 }
 
 func (h *handler) updatePics() bool {
-	pics, err := h.update()
-	if err != nil {
+	pics, ok := h.update(7)
+	if !ok {
 		return false
 	}
 
-	for _, pic := range pics {
-		if ok, _ := h.db.check(pic.Date); ok {
-			h.db.insert(pic.Date, pic.BaseURL)
+	for i := range pics {
+		if ok, _ := h.db.check(pics[i].Date); ok {
+			h.db.insert(pics[i].Date, pics[i].BaseURL)
 		}
 	}
 	return true
@@ -85,8 +86,8 @@ func (h *handler) updateBuff() bool {
 		return false
 	}
 
-	for i, pic := range tmp {
-		h.pic[i] = pic
+	for i := range tmp {
+		h.pic[i] = tmp[i]
 	}
 	return true
 }
@@ -134,9 +135,9 @@ func (h *handler) redirect(w http.ResponseWriter, r *http.Request) {
 
 		switch res[0] {
 		case "uhdres":
-			url = domain + pic.BaseURL + "_UHD.jpg"
+			url = h.base + pic.BaseURL + "_UHD.jpg"
 		default:
-			url = domain + pic.BaseURL + "_" + res[0] + ".jpg"
+			url = h.base + pic.BaseURL + "_" + res[0] + ".jpg"
 		}
 	}
 	http.Redirect(w, r, url, http.StatusFound)

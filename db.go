@@ -22,6 +22,8 @@ package main
 import (
 	"database/sql"
 	"fmt"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type insertFunc func(date, baseURL string) error
@@ -32,11 +34,6 @@ type dbOperator struct {
 	insert insertFunc
 	query  queryFunc
 	check  checkFunc
-}
-
-type picture struct {
-	Date    string `json:"enddate"`
-	BaseURL string `json:"urlbase"`
 }
 
 func newDbOperator(db *sql.DB, table string) (*dbOperator, error) {
