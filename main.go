@@ -23,7 +23,7 @@ import (
 	"database/sql"
 	"flag"
 	"net/http"
-	"time"
+	"sync"
 )
 
 const bing string = "https://cn.bing.com"
@@ -31,6 +31,7 @@ const apod string = "https://apod.nasa.gov/apod/"
 
 var conf config
 var confpath string
+var wg sync.WaitGroup
 
 var bingHandler *handler
 var apodHandler *handler
@@ -60,15 +61,15 @@ func init() {
 		panic("CreateHandlerError")
 	}
 
-	go bingHandler.cronTask(conf.UpdateTime)
-	go apodHandler.cronTask(conf.UpdateTime)
+	go bingHandler.updateTask(conf.UpdateTime, &wg)
+	go apodHandler.updateTask(conf.UpdateTime, &wg)
 }
 
 func main() {
 	http.HandleFunc(bingHandler.path, bingHandler.redirect)
 	http.HandleFunc(apodHandler.path, apodHandler.redirect)
 
-	time.Sleep(time.Second)
+	wg.Wait()
 
 	if conf.EnableTLS {
 		http.ListenAndServeTLS("0.0.0.0:"+conf.Port,

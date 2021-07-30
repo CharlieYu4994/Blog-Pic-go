@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -95,13 +96,19 @@ func (h *handler) updateBuff() bool {
 	return true
 }
 
-func (h *handler) cronTask(dur int) {
+func (h *handler) updateTask(dur int, wg *sync.WaitGroup) {
+	wg.Add(1)
+	first := true
 	timer := time.NewTimer(0)
 	for {
 		<-timer.C
 		h.updatePics()
 		h.updateBuff()
 		timer.Reset(getDuration(dur))
+		if first {
+			wg.Done()
+			first = false
+		}
 	}
 }
 
