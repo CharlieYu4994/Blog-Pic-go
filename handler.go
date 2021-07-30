@@ -24,13 +24,14 @@ import (
 	"math/rand"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
 type updateFunc func(num int) ([]picture, bool)
 
 type handler struct {
-	name    string
+	path    string
 	base    string
 	picNum  int
 	pic     []picture
@@ -58,8 +59,10 @@ func newHandler(name, base string, num int, res bool, u updateFunc, db *sql.DB) 
 	}
 
 	return &handler{
-		name:    name,
-		pic:     make([]picture, 0, num),
+		path:    "/" + name,
+		base:    base,
+		picNum:  num,
+		pic:     make([]picture, num),
 		db:      tmp,
 		update:  u,
 		withres: res,
@@ -103,8 +106,10 @@ func (h *handler) cronTask(dur int) {
 }
 
 func (h *handler) redirect(w http.ResponseWriter, r *http.Request) {
-	var url string
 	var pic picture
+	var url strings.Builder
+	url.Grow(192)
+	url.WriteString(h.base)
 
 	args := r.URL.Query()
 	dat, ok := args["dat"]
@@ -126,6 +131,7 @@ func (h *handler) redirect(w http.ResponseWriter, r *http.Request) {
 	} else {
 		pic = h.pic[h.picNum-1]
 	}
+	url.WriteString(pic.BaseURL)
 
 	if h.withres {
 		res, ok := args["res"]
@@ -135,10 +141,12 @@ func (h *handler) redirect(w http.ResponseWriter, r *http.Request) {
 
 		switch res[0] {
 		case "uhdres":
-			url = h.base + pic.BaseURL + "_UHD.jpg"
+			url.WriteString("_UHD.jpg")
 		default:
-			url = h.base + pic.BaseURL + "_" + res[0] + ".jpg"
+			url.WriteString("_")
+			url.WriteString(res[0])
+			url.WriteString(".jpg")
 		}
 	}
-	http.Redirect(w, r, url, http.StatusFound)
+	http.Redirect(w, r, url.String(), http.StatusFound)
 }

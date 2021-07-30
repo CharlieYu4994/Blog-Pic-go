@@ -32,8 +32,8 @@ const apod string = "https://apod.nasa.gov/apod/"
 var conf config
 var confpath string
 
-var bingHandler handler
-var apodHandler handler
+var bingHandler *handler
+var apodHandler *handler
 
 func init() {
 	flag.StringVar(&confpath, "c", "./config.json", "Set the config path")
@@ -50,12 +50,12 @@ func init() {
 		panic("OpenDatabaseError")
 	}
 
-	bingHandler, err := newHandler("bing", bing, conf.PicNum, true, getBing, db)
+	bingHandler, err = newHandler("bing", bing, conf.PicNum, true, getBing, db)
 	if err != nil {
 		panic("CreateHandlerError")
 	}
 
-	apodHandler, err := newHandler("apod", apod, conf.PicNum, false, getAPOD, db)
+	apodHandler, err = newHandler("apod", apod, conf.PicNum, false, getAPOD, db)
 	if err != nil {
 		panic("CreateHandlerError")
 	}
@@ -65,8 +65,8 @@ func init() {
 }
 
 func main() {
-	http.HandleFunc(bingHandler.name, bingHandler.redirect)
-	http.HandleFunc(apodHandler.name, apodHandler.redirect)
+	http.HandleFunc(bingHandler.path, bingHandler.redirect)
+	http.HandleFunc(apodHandler.path, apodHandler.redirect)
 
 	time.Sleep(time.Second)
 
