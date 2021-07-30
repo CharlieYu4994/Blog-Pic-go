@@ -61,6 +61,7 @@ func init() {
 		panic("CreateHandlerError")
 	}
 
+	wg.Add(2)
 	go bingHandler.updateTask(conf.UpdateTime, &wg)
 	go apodHandler.updateTask(conf.UpdateTime, &wg)
 }

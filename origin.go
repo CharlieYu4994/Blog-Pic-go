@@ -24,13 +24,14 @@ import (
 	"io/ioutil"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
 
 type picture struct {
 	Date    string `json:"enddate"`
-	BaseURL string `json:"urlbase"`
+	BaseUrl string `json:"urlbase"`
 }
 
 func httpGet(url string) ([]byte, bool) {
@@ -48,9 +49,14 @@ func httpGet(url string) ([]byte, bool) {
 }
 
 func getBing(num int) ([]picture, bool) {
-	url := bing + "/HPImageArchive.aspx?format=js&n=2&mkt=zh-CN"
+	var url strings.Builder
+	url.Grow(192)
+	url.WriteString(bing)
+	url.WriteString("/HPImageArchive.aspx?format=js&n=")
+	url.WriteString(strconv.Itoa(num))
+	url.WriteString("&mkt=zh-CN")
 
-	msg, ok := httpGet(url)
+	msg, ok := httpGet(url.String())
 	if !ok {
 		return nil, false
 	}
@@ -72,7 +78,7 @@ func getAPOD(num int) ([]picture, bool) {
 	date := time.Now()
 	matcher := regexp.MustCompile(`image/.*\.jpg`)
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < num; i++ {
 		date = date.AddDate(0, 0, -1)
 
 		url.Reset()
@@ -92,13 +98,13 @@ func getAPOD(num int) ([]picture, bool) {
 			continue
 		}
 
-		baseURL := matcher.FindAll(msg, -1)
-		if baseURL == nil {
+		baseUrl := matcher.FindAll(msg, -1)
+		if baseUrl == nil {
 			continue
 		}
 		ret = append(ret, picture{
 			Date:    date.Format("20060102"),
-			BaseURL: string(baseURL[1]),
+			BaseUrl: string(baseUrl[1]),
 		})
 	}
 	return ret, true

@@ -76,9 +76,9 @@ func (h *handler) updatePics() bool {
 		return false
 	}
 
-	for i := range pics {
+	for i := len(pics) - 1; i > -1; i-- {
 		if ok, _ := h.db.check(pics[i].Date); ok {
-			h.db.insert(pics[i].Date, pics[i].BaseURL)
+			h.db.insert(pics[i].Date, pics[i].BaseUrl)
 		}
 	}
 	return true
@@ -97,7 +97,6 @@ func (h *handler) updateBuff() bool {
 }
 
 func (h *handler) updateTask(dur int, wg *sync.WaitGroup) {
-	wg.Add(1)
 	first := true
 	timer := time.NewTimer(0)
 	for {
@@ -138,7 +137,7 @@ func (h *handler) redirect(w http.ResponseWriter, r *http.Request) {
 	} else {
 		pic = h.pic[h.picNum-1]
 	}
-	url.WriteString(pic.BaseURL)
+	url.WriteString(pic.BaseUrl)
 
 	if h.withres {
 		res, ok := args["res"]

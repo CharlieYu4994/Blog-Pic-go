@@ -26,7 +26,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type insertFunc func(date, baseURL string) error
+type insertFunc func(date, baseUrl string) error
 type queryFunc func(num int) ([]picture, error)
 type checkFunc func(date string) (bool, error)
 
@@ -56,8 +56,8 @@ func newDbOperator(db *sql.DB, table string) (*dbOperator, error) {
 	}
 
 	return &dbOperator{
-		insert: func(date, baseURL string) error {
-			_, err := insertCmd.Exec(date, baseURL)
+		insert: func(date, baseUrl string) error {
+			_, err := insertCmd.Exec(date, baseUrl)
 			return err
 		},
 
@@ -71,7 +71,7 @@ func newDbOperator(db *sql.DB, table string) (*dbOperator, error) {
 			}
 
 			for result.Next() {
-				err := result.Scan(&pic.Date, &pic.BaseURL)
+				err := result.Scan(&pic.Date, &pic.BaseUrl)
 				if err != nil {
 					return nil, err
 				}
