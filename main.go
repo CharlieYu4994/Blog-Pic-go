@@ -35,6 +35,7 @@ var wg sync.WaitGroup
 
 var bingHandler *handler
 var apodHandler *handler
+var rootHandler *multiHandler
 
 func init() {
 	flag.StringVar(&confpath, "c", "./config.json", "Set the config path")
@@ -61,6 +62,8 @@ func init() {
 		panic("CreateHandlerError")
 	}
 
+	rootHandler = newMultiHandler("/", bingHandler, apodHandler)
+
 	wg.Add(2)
 	go bingHandler.updateTask(conf.UpdateTime, &wg)
 	go apodHandler.updateTask(conf.UpdateTime, &wg)
@@ -69,6 +72,7 @@ func init() {
 func main() {
 	http.HandleFunc(bingHandler.path, bingHandler.redirect)
 	http.HandleFunc(apodHandler.path, apodHandler.redirect)
+	http.HandleFunc(rootHandler.path, rootHandler.redirect)
 
 	wg.Wait()
 

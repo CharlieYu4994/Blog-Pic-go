@@ -32,13 +32,19 @@ import (
 type updateFunc func(num int) ([]picture, bool)
 
 type handler struct {
+	withres bool
+	picNum  int
 	path    string
 	base    string
-	picNum  int
-	pic     []picture
 	db      *dbOperator
+	pic     []picture
 	update  updateFunc
-	withres bool
+}
+
+type multiHandler struct {
+	index    int
+	path     string
+	handlers []*handler
 }
 
 func getDuration(t int) time.Duration {
@@ -68,6 +74,13 @@ func newHandler(name, base string, num int, res bool, u updateFunc, db *sql.DB) 
 		update:  u,
 		withres: res,
 	}, nil
+}
+
+func newMultiHandler(path string, h ...*handler) *multiHandler {
+	return &multiHandler{
+		path:     path,
+		handlers: h,
+	}
 }
 
 func (h *handler) updatePics() bool {
@@ -155,4 +168,13 @@ func (h *handler) redirect(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	http.Redirect(w, r, url.String(), http.StatusFound)
+}
+
+func (m *multiHandler) redirect(w http.ResponseWriter, r *http.Request) {
+	if m.index == len(m.handlers) {
+		m.index = 0
+	}
+	r.URL.RawQuery = "dat=-1"
+	m.handlers[m.index].redirect(w, r)
+	m.index++
 }
