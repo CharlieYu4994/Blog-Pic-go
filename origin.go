@@ -21,6 +21,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -76,7 +77,7 @@ func getAPOD(num int) ([]picture, bool) {
 	var ret []picture
 	try := 0
 	date := time.Now()
-	matcher := regexp.MustCompile(`image/.*\.jpg`)
+	matcher := regexp.MustCompile(`image/.*\..{3,4}`)
 
 	for i := 0; i < num; i++ {
 		date = date.AddDate(0, 0, -1)
@@ -102,9 +103,10 @@ func getAPOD(num int) ([]picture, bool) {
 		if baseUrl == nil {
 			continue
 		}
+		fmt.Println(date.Format("20060102"))
 		ret = append(ret, picture{
 			Date:    date.Format("20060102"),
-			BaseUrl: string(baseUrl[1]),
+			BaseUrl: string(baseUrl[len(baseUrl)-1]),
 		})
 	}
 	return ret, true
