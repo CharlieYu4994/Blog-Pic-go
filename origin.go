@@ -76,8 +76,8 @@ func getAPOD(num int) ([]picture, bool) {
 	var url strings.Builder
 	var ret []picture
 	try := 0
-	date := time.Now()
-	matcher := regexp.MustCompile(`image/.*\..{3,4}`)
+	date := time.Now().AddDate(0, 0, 1)
+	matcher := regexp.MustCompile(`image/\d{4}/.*\.[a-zA-Z]{3,4}`)
 
 	for i := 0; i < num; i++ {
 		date = date.AddDate(0, 0, -1)
