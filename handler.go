@@ -42,7 +42,6 @@ type handler struct {
 }
 
 type multiHandler struct {
-	index    int
 	path     string
 	handlers []*handler
 }
@@ -171,10 +170,7 @@ func (h *handler) redirect(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m *multiHandler) redirect(w http.ResponseWriter, r *http.Request) {
-	if m.index == len(m.handlers) {
-		m.index = 0
-	}
 	r.URL.RawQuery = "dat=-1"
-	m.handlers[m.index].redirect(w, r)
-	m.index++
+	index := int(time.Now().Unix()) % len(m.handlers)
+	m.handlers[index].redirect(w, r)
 }
