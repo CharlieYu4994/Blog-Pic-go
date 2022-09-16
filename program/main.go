@@ -70,8 +70,8 @@ func init() {
 }
 
 func main() {
-	http.HandleFunc(bingHandler.path, bingHandler.redirect)
-	http.HandleFunc(apodHandler.path, apodHandler.redirect)
+	http.HandleFunc(bingHandler.getPath(), bingHandler.redirect)
+	http.HandleFunc(apodHandler.getPath(), apodHandler.redirect)
 	http.HandleFunc(rootHandler.path, rootHandler.redirect)
 
 	wg.Wait()

@@ -26,14 +26,10 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type insertFunc func(date, baseUrl string) error
-type queryFunc func(num int) ([]picture, error)
-type checkFunc func(date string) (bool, error)
-
 type dbOperator struct {
-	insert insertFunc
-	query  queryFunc
-	check  checkFunc
+	insertCmd *sql.Stmt
+	queryCmd  *sql.Stmt
+	checkCmd  *sql.Stmt
 }
 
 func newDbOperator(db *sql.DB, table string) (*dbOperator, error) {
@@ -56,48 +52,52 @@ func newDbOperator(db *sql.DB, table string) (*dbOperator, error) {
 	}
 
 	return &dbOperator{
-		insert: func(date, baseUrl string) error {
-			_, err := insertCmd.Exec(date, baseUrl)
-			return err
-		},
-
-		query: func(num int) ([]picture, error) {
-			var pic picture
-			tmp := make([]picture, 0, num)
-
-			result, err := queryCmd.Query(num)
-			if err != nil {
-				return nil, err
-			}
-
-			for result.Next() {
-				err := result.Scan(&pic.Date, &pic.BaseUrl)
-				if err != nil {
-					return nil, err
-				}
-				tmp = append(tmp, pic)
-			}
-
-			if num-len(tmp) > 0 {
-				for i := 0; i < num-len(tmp); i++ {
-					tmp = append(tmp, tmp[i])
-				}
-			}
-			return tmp, nil
-		},
-
-		check: func(date string) (bool, error) {
-			var tmp string
-
-			result := checkCmd.QueryRow(date)
-			err := result.Scan(&tmp)
-			if err == nil {
-				if tmp == "NULL" {
-					return true, nil
-				}
-				return false, nil
-			}
-			return false, err
-		},
+		insertCmd: insertCmd,
+		queryCmd:  queryCmd,
+		checkCmd:  checkCmd,
 	}, nil
+}
+
+func (d *dbOperator) insert(date, baseUrl string) error {
+	_, err := d.insertCmd.Exec(date, baseUrl)
+	return err
+}
+
+func (d *dbOperator) query(num int) ([]picture, error) {
+	var pic picture
+	tmp := make([]picture, 0, num)
+
+	result, err := d.queryCmd.Query(num)
+	if err != nil {
+		return nil, err
+	}
+
+	for result.Next() {
+		err := result.Scan(&pic.Date, &pic.BaseUrl)
+		if err != nil {
+			return nil, err
+		}
+		tmp = append(tmp, pic)
+	}
+
+	if num-len(tmp) > 0 {
+		for i := 0; i < num-len(tmp); i++ {
+			tmp = append(tmp, tmp[i])
+		}
+	}
+	return tmp, nil
+}
+
+func (d *dbOperator) check(date string) (bool, error) {
+	var tmp string
+
+	result := d.checkCmd.QueryRow(date)
+	err := result.Scan(&tmp)
+	if err == nil {
+		if tmp == "NULL" {
+			return true, nil
+		}
+		return false, nil
+	}
+	return false, err
 }

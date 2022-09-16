@@ -8,4 +8,4 @@
     "picnum": 7
 }
 //you can use relative path as well as absolute path
-//if you set enabletls to false the pathes will be ignore
+//if you set enabletls to false the pathes will be ignored

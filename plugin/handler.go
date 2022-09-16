@@ -41,9 +41,15 @@ type handler struct {
 	update  updateFunc
 }
 
+type handle interface {
+	redirect(w http.ResponseWriter, r *http.Request)
+	updateTask(dur int, wg *sync.WaitGroup)
+	getPath() string
+}
+
 type multiHandler struct {
 	path     string
-	handlers []*handler
+	handlers []handle
 }
 
 func getDuration(t int) time.Duration {
@@ -75,7 +81,7 @@ func newHandler(name, base string, num int, res bool, u updateFunc, db *sql.DB) 
 	}, nil
 }
 
-func newMultiHandler(path string, h ...*handler) *multiHandler {
+func newMultiHandler(path string, h ...handle) *multiHandler {
 	return &multiHandler{
 		path:     path,
 		handlers: h,
@@ -102,9 +108,7 @@ func (h *handler) updateBuff() bool {
 		return false
 	}
 
-	for i := range tmp {
-		h.pic[i] = tmp[i]
-	}
+	h.pic = tmp
 	return true
 }
 
@@ -167,6 +171,10 @@ func (h *handler) redirect(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	http.Redirect(w, r, url.String(), http.StatusFound)
+}
+
+func (h *handler) getPath() string {
+	return h.path
 }
 
 func (m *multiHandler) redirect(w http.ResponseWriter, r *http.Request) {
