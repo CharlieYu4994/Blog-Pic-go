@@ -21,7 +21,6 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"os"
 )
 
@@ -40,7 +39,7 @@ func readConf(path string, conf *config) error {
 	if err != nil || os.IsExist(err) {
 		return err
 	}
-	tmp, err := ioutil.ReadFile(path)
+	tmp, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
