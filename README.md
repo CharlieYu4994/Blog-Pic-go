@@ -1,5 +1,5 @@
 # Blog-Pic-go
-![Go](https://img.shields.io/github/go-mod/go-version/CharlieYu4994/Blog-Pic-go)![GPLv3](https://img.shields.io/github/license/CharlieYu4994/Blog-Pic-go) ![GitHub last commit](https://img.shields.io/github/last-commit/CharlieYu4994/Blog-Pic-go)
+![GPLv3](https://img.shields.io/github/license/CharlieYu4994/Blog-Pic-go) ![GitHub last commit](https://img.shields.io/github/last-commit/CharlieYu4994/Blog-Pic-go)
 
 ![Demo](https://api.lassi-cat.cn:60443/randpic/)
 
