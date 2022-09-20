@@ -21,13 +21,13 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/dlclark/regexp2"
 )
 
 type picture struct {
@@ -35,53 +35,52 @@ type picture struct {
 	BaseUrl string `json:"urlbase"`
 }
 
-func httpGet(url string) ([]byte, bool) {
-	resp, err := http.Get(url)
-	if err != nil || resp.StatusCode != 200 {
-		return nil, false
-	}
-	defer resp.Body.Close()
-
-	msg, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, false
-	}
-	return msg, true
-}
-
 func getBing(num int) ([]picture, bool) {
 	var url strings.Builder
+	var tmp []byte
+
 	url.Grow(192)
 	url.WriteString(bing)
 	url.WriteString("/HPImageArchive.aspx?format=js&n=")
 	url.WriteString(strconv.Itoa(num))
 	url.WriteString("&mkt=zh-CN")
 
-	msg, ok := httpGet(url.String())
-	if !ok {
+	for t := 0; t <= 5; t++ {
+		resp, err := http.Get(url.String())
+		if err != nil || resp.StatusCode != 200 {
+			continue
+		}
+
+		tmp, err = io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if err != nil {
+			continue
+		}
+	}
+
+	if tmp == nil {
 		return nil, false
 	}
 
-	var tmp struct {
+	var ret struct {
 		Images []picture
 	}
-	err := json.Unmarshal(msg, &tmp)
+	err := json.Unmarshal(tmp, &ret)
 	if err != nil {
 		return nil, false
 	}
-	return tmp.Images, true
+	return ret.Images, true
 }
 
 func getAPOD(num int) ([]picture, bool) {
 	var url strings.Builder
 	var ret []picture
-	try := 0
+	var tmp []byte
 	date := time.Now().AddDate(0, 0, 1)
-	matcher := regexp.MustCompile(`image/\d{4}/.*\.[a-zA-Z]{3,4}`)
+	matcher := regexp2.MustCompile(`(?<=\<a href=\")(image\/\d{4}\/.*\.\w{3,4})(?=[\s\S]*<IMG)`, 0)
 
 	for i := 0; i < num; i++ {
 		date = date.AddDate(0, 0, -1)
-
 		url.Reset()
 		url.Grow(40)
 		url.WriteString(apod)
@@ -89,24 +88,30 @@ func getAPOD(num int) ([]picture, bool) {
 		url.WriteString(date.Format("060102"))
 		url.WriteString(".html")
 
-	try:
-		msg, ok := httpGet(url.String())
-		if !ok {
-			if try < 5 {
-				try += 1
-				goto try
+		for t := 0; t <= 5; t++ {
+			resp, err := http.Get(url.String())
+			if err != nil || resp.StatusCode != 200 {
+				continue
 			}
+
+			tmp, err = io.ReadAll(resp.Body)
+			resp.Body.Close()
+			if err != nil {
+				continue
+			}
+		}
+
+		if tmp == nil {
 			continue
 		}
 
-		baseUrl := matcher.FindAll(msg, -1)
-		if baseUrl == nil {
+		baseUrl, err := matcher.FindStringMatch(string(tmp))
+		if err != nil || baseUrl == nil {
 			continue
 		}
-		fmt.Println(date.Format("20060102"))
 		ret = append(ret, picture{
 			Date:    date.Format("20060102"),
-			BaseUrl: string(baseUrl[len(baseUrl)-1]),
+			BaseUrl: string(baseUrl.String()),
 		})
 	}
 	return ret, true
