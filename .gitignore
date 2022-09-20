@@ -6,3 +6,4 @@ config.json
 picture.db
 .vscode/*
 main
+*.so
