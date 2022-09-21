@@ -67,15 +67,15 @@ func init() {
 	wg.Add(2)
 	go bingHandler.updateTask(conf.UpdateTime, &wg)
 	go apodHandler.updateTask(conf.UpdateTime, &wg)
-}
 
-func main() {
 	http.HandleFunc(bingHandler.getPath(), bingHandler.redirect)
 	http.HandleFunc(apodHandler.getPath(), apodHandler.redirect)
 	http.HandleFunc(rootHandler.path, rootHandler.redirect)
 
 	wg.Wait()
+}
 
+func main() {
 	if conf.EnableTLS {
 		http.ListenAndServeTLS("0.0.0.0:"+conf.Port,
 			conf.CertPath, conf.KeyPath, nil)

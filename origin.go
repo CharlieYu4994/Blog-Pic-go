@@ -114,5 +114,9 @@ func getAPOD(num int) ([]picture, bool) {
 			BaseUrl: string(baseUrl.String()),
 		})
 	}
+
+	if ret == nil {
+		return nil, false
+	}
 	return ret, true
 }
